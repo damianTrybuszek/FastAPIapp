@@ -1,33 +1,63 @@
-from typing import List
+from typing import Optional, List
+from uuid import UUID
 from uuid import uuid4
-from fastapi import FastAPI
-from starlette.middleware.cors import CORSMiddleware
-from models import User, Gender, Role
+
+from fastapi import FastAPI, status
+from pydantic import BaseModel
+
+import models
+from database import SessionLocal
+from models import Genre, Role
 
 app = FastAPI()
 
-app.add_middleware(
-    CORSMiddleware,
-    allow_origins=["*"],
-    allow_credentials=True,
-    allow_methods=["*"],
-    allow_headers=["*"],
-)
 
-db: List[User] = [
-    User(id=uuid4(), first_name="Katy", last_name="Perry", gender=Gender.female, roles=[Role.student]),
-    User(id=uuid4(), first_name="Zakk", last_name="Wylde", gender=Gender.male, roles=[Role.admin, Role.user])
-]
+class Musician(BaseModel):
+    id: Optional[UUID] = uuid4()
+    first_name: str
+    last_name: str
+    band: Optional[str] = "solo musician"
+    genres: List[Genre]
+    roles: List[Role]
 
-@app.get("/")
-async def root():
-    return {"Hello": "Damian"}
+    class Config:
+        orm_mode = True
 
-@app.get("/api/v1/users")
-async def fetch_users():
-    return db
 
-@app.post("/api/v1/users")
-async def register_user(user: User):
-    db.append(user)
-    return {"id": user.id}
+db = SessionLocal()
+
+
+@app.get("/api/v1/musicians", response_model=List[Musician], status_code=200)
+async def get_all_musicians():
+    musicians = db.query(models.Musician).all()
+    return musicians
+
+
+@app.get("/api/v1/musicians/{musician_id}")
+async def get_an_musician(musician_id: UUID):
+    pass
+
+
+@app.post("/api/v1/musicians", response_model=Musician, status_code=status.HTTP_201_CREATED)
+async def register_musician(musician: Musician):
+    new_musician = models.Musician(
+        id=musician.id,
+        first_name=musician.first_name,
+        last_name=musician.last_name,
+        band=musician.band,
+        genres=musician.genres,
+        roles=musician.roles,
+    )
+    db.add(new_musician)
+    db.commit()
+    return new_musician
+
+
+@app.put("/api/v1/musicians/{musician_id}")
+async def modify_musician_details(musician_id: UUID):
+    pass
+
+
+@app.delete("/api/v1/musicians/{musician_id}")
+async def delete_musician(musician_id: UUID):
+    pass

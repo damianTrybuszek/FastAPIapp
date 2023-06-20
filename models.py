@@ -1,24 +1,32 @@
-from pydantic import BaseModel
-from uuid import UUID, uuid4
-from typing import Optional, List
 from enum import Enum
 
-class Gender(str, Enum):
-    male = "male"
-    female = "female"
+from sqlalchemy import String, Column, UUID, ARRAY
+
+from database import Base
+
+
+class Genre(str, Enum):
+    rock = "rock"
+    pop = "pop"
+    jazz = "jazz"
+    metal = "metal"
+    hard_rock = "hard rock"
+    heavy_metal = "heavy metal"
+
 
 class Role(str, Enum):
-    admin = "admin"
-    user = "user"
-    student = "student"
-
-class User(BaseModel):
-    id: Optional[UUID] = uuid4()
-    first_name: str
-    last_name: str
-    middle_name: Optional[str]
-    gender: Gender
-    roles: List[Role]
+    guitarist = "guitarist"
+    bassist = "bassist"
+    keyboardist = "keyboardist"
+    drummer = "drummer"
+    vocalist = "vocalist"
 
 
-
+class Musician(Base):
+    __tablename__ = "musicians"
+    id = Column(UUID, primary_key=True)
+    first_name = Column(String(255))
+    last_name = Column(String(255))
+    band = Column(String(255))
+    genres = Column(ARRAY(String))
+    roles = Column(ARRAY(String))
