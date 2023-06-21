@@ -50,7 +50,7 @@ async def get_all_musicians():
 
 
 @app.get("/api/v1/musicians/{musician_id}", response_model=Musician, status_code=status.HTTP_200_OK)
-async def get_an_musician(musician_id: UUID):
+async def get_a_musician(musician_id: UUID):
     return db.query(models.Musician).filter(models.Musician.id == musician_id).first()
 
 
