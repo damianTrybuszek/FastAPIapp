@@ -1,9 +1,11 @@
-from sqlalchemy import create_engine
-from sqlalchemy.orm import declarative_base, sessionmaker
+import os
 
-connection_url =
+import sqlalchemy
+from sqlalchemy.orm import sessionmaker, declarative_base
 
-engine = create_engine(connection_url, echo=True)
+connection_url =os.getenv('DB_CONN_STR')
+
+engine = sqlalchemy.create_engine(connection_url, echo=True)
 
 Base = declarative_base()
 
